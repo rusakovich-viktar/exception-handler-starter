@@ -1,6 +1,6 @@
 package by.clevertec.exception;
 
-import by.clevertec.util.Constant.ErrorMessages;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
                 .map(fieldError -> "Error in field '" + fieldError.getField() + "': " + fieldError.getDefaultMessage())
                 .collect(Collectors.joining(", "));
 
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ErrorMessages.VALIDATION_ERROR, exceptionMessage);
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Validation error", exceptionMessage);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 
     }
@@ -75,9 +75,9 @@ public class GlobalExceptionHandler {
     }
 
     private static String getStringFromJson(String errorMessage) {
-        JsonElement je = JsonParser.parseString(errorMessage);
-        JsonObject jo = je.getAsJsonObject();
-        return jo.get("message").getAsString();
+        JsonElement jsonElement = JsonParser.parseString(errorMessage);
+        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        return jsonObject.get("message").getAsString();
     }
 
 }
