@@ -1,6 +1,11 @@
 package by.clevertec.exception;
 
 import by.clevertec.util.Constant.ErrorMessages;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import feign.FeignException;
+import java.rmi.ConnectException;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -41,6 +46,24 @@ public class GlobalExceptionHandler {
         return getErrorResponseEntity(exception, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ConnectException.class)
+    public ResponseEntity<ErrorResponse> connectException(ConnectException exception) {
+
+        return getErrorResponseEntity(exception, HttpStatus.INTERNAL_SERVER_ERROR);
+
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ErrorResponse> handleFeignNotFoundException(FeignException exception) {
+        HttpStatus httpStatus = HttpStatus.valueOf(exception.status());
+
+        String errorMessage = exception.contentUTF8();
+        String message = getStringFromJson(errorMessage);
+
+        return new ResponseEntity<>(new ErrorResponse(httpStatus.value(), httpStatus.getReasonPhrase(), message), httpStatus);
+    }
+
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception exception) {
         log.error("Unexpected error occurred: ", exception);
@@ -50,4 +73,11 @@ public class GlobalExceptionHandler {
     private static ResponseEntity<ErrorResponse> getErrorResponseEntity(Exception exception, HttpStatus httpStatus) {
         return new ResponseEntity<>(new ErrorResponse(httpStatus.value(), httpStatus.getReasonPhrase(), exception.getMessage()), httpStatus);
     }
+
+    private static String getStringFromJson(String errorMessage) {
+        JsonElement je = JsonParser.parseString(errorMessage);
+        JsonObject jo = je.getAsJsonObject();
+        return jo.get("message").getAsString();
+    }
+
 }
