@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 public class EntityNotFoundExceptionCustomTest {
 
-
     @Test
     public void testOf() {
         String id = ID;

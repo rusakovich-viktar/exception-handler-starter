@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 public class ErrorResponseTest {
 
-
     @Test
     public void testErrorResponse() {
         int status = 404;

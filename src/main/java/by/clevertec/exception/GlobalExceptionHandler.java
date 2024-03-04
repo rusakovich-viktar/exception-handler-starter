@@ -1,6 +1,5 @@
 package by.clevertec.exception;
 
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -31,6 +30,16 @@ public class GlobalExceptionHandler {
 
     }
 
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ErrorResponse> handleFeignException(FeignException exception) {
+        HttpStatus httpStatus = HttpStatus.valueOf(exception.status());
+
+        String errorMessage = exception.contentUTF8();
+        String message = getStringFromJson(errorMessage);
+
+        return new ResponseEntity<>(new ErrorResponse(httpStatus.value(), httpStatus.getReasonPhrase(), message), httpStatus);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleException(IllegalArgumentException exception) {
         return getErrorResponseEntity(exception, HttpStatus.BAD_REQUEST);
@@ -48,21 +57,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConnectException.class)
     public ResponseEntity<ErrorResponse> connectException(ConnectException exception) {
-
         return getErrorResponseEntity(exception, HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
-
-    @ExceptionHandler(FeignException.class)
-    public ResponseEntity<ErrorResponse> handleFeignNotFoundException(FeignException exception) {
-        HttpStatus httpStatus = HttpStatus.valueOf(exception.status());
-
-        String errorMessage = exception.contentUTF8();
-        String message = getStringFromJson(errorMessage);
-
-        return new ResponseEntity<>(new ErrorResponse(httpStatus.value(), httpStatus.getReasonPhrase(), message), httpStatus);
-    }
-
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception exception) {
