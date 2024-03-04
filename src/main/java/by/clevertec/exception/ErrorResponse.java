@@ -8,10 +8,10 @@ import lombok.Getter;
 @Getter
 public class ErrorResponse {
 
-    private String timestamp;
-    private int status;
-    private String error;
-    private String message;
+    private final String timestamp;
+    private final int status;
+    private final String error;
+    private final String message;
 
     public ErrorResponse(int status, String error, String message) {
         this.status = status;
@@ -19,6 +19,5 @@ public class ErrorResponse {
         this.message = message;
         this.timestamp = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME);
     }
-
 
 }

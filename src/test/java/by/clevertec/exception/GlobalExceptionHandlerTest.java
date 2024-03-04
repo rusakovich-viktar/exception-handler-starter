@@ -27,7 +27,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @ExtendWith(MockitoExtension.class)
 public class GlobalExceptionHandlerTest {
 
-
+    public static final String ERROR_IN_FIELD_FIELD_1_MESSAGE_1_ERROR_IN_FIELD_FIELD_2_MESSAGE_2 = "Error in field 'field1': message1, Error in field 'field2': message2";
+    public static final String MESSAGE_1 = "message1";
+    public static final String MESSAGE_2 = "message2";
+    public static final String FIELD_1 = "field1";
+    public static final String FIELD_2 = "field2";
     @Mock
     private Exception exception;
     @Mock
@@ -49,14 +53,13 @@ public class GlobalExceptionHandlerTest {
     @Mock
     private ConnectException connectException;
 
-
     @InjectMocks
     private GlobalExceptionHandler handler;
 
     @Test
     public void testHandleException_MethodArgumentNotValidException() {
-        FieldError fieldError1 = new FieldError(OBJECT, "field1", "message1");
-        FieldError fieldError2 = new FieldError(OBJECT, "field2", "message2");
+        FieldError fieldError1 = new FieldError(OBJECT, FIELD_1, MESSAGE_1);
+        FieldError fieldError2 = new FieldError(OBJECT, FIELD_2, MESSAGE_2);
 
         when(methodArgumentNotValidException.getBindingResult()).thenReturn(bindingResult);
         when(bindingResult.getFieldErrors()).thenReturn(Arrays.asList(fieldError1, fieldError2));
@@ -64,7 +67,7 @@ public class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = handler.handleException(methodArgumentNotValidException);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Error in field 'field1': message1, Error in field 'field2': message2", response.getBody().getMessage());
+        assertEquals(ERROR_IN_FIELD_FIELD_1_MESSAGE_1_ERROR_IN_FIELD_FIELD_2_MESSAGE_2, response.getBody().getMessage());
     }
 
     @Test
@@ -112,7 +115,7 @@ public class GlobalExceptionHandlerTest {
         when(feignException.status()).thenReturn(404);
         when(feignException.contentUTF8()).thenReturn("{\"message\":\"Not Found\"}");
 
-        ResponseEntity<ErrorResponse> response = handler.handleFeignNotFoundException(feignException);
+        ResponseEntity<ErrorResponse> response = handler.handleFeignException(feignException);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(NOT_FOUND, response.getBody().getMessage());
@@ -127,6 +130,5 @@ public class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(UNEXPECTED_ERROR, response.getBody().getMessage());
     }
-
 
 }
